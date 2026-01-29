@@ -1,4 +1,4 @@
-import { motion, useAnimation } from 'motion/react';
+import { motion } from 'motion/react';
 import { useEffect, useState } from 'react';
 import { Language, translations } from '../translations';
 import img1 from 'figma:asset/da7dfd3f088ee83b811e41eb4a4a325fa6fd6233.png';
@@ -45,32 +45,28 @@ export default function LuxurySlide8({ language }: { language: Language; isMuted
   ];
 
   const [currentIndex, setCurrentIndex] = useState(0);
-  const controls = useAnimation();
 
   useEffect(() => {
     const interval = setInterval(() => {
       setCurrentIndex((prev) => (prev + 1) % venues.length);
     }, 4500);
     return () => clearInterval(interval);
-  }, []);
+  }, [venues.length]);
 
   return (
     <div className="w-full h-full bg-[#0E223C] relative overflow-hidden">
-      {/* Image carousel - horizontal slide */}
-      <div className="absolute inset-0 flex">
+      {/* Image carousel - FIXED */}
+      <div className="absolute inset-0">
         {venues.map((venue, index) => (
           <motion.div
             key={venue.name}
-            animate={{
-              x: `${(index - currentIndex) * 100}%`,
-              opacity: index === currentIndex ? 1 : 0.3,
-              scale: index === currentIndex ? 1 : 0.9
-            }}
-            transition={{ 
-              duration: 1.2,
-              ease: [0.22, 1, 0.36, 1]
-            }}
             className="absolute inset-0 w-full h-full"
+            initial={{ opacity: 0 }}
+            animate={{ 
+              opacity: currentIndex === index ? 1 : 0,
+              scale: currentIndex === index ? 1 : 1.05
+            }}
+            transition={{ duration: 1, ease: [0.22, 1, 0.36, 1] }}
           >
             <img 
               src={venue.img} 
@@ -87,92 +83,101 @@ export default function LuxurySlide8({ language }: { language: Language; isMuted
         ))}
       </div>
 
-      {/* Content overlay */}
-      <div className="absolute inset-0 flex flex-col justify-between p-6 md:p-16">
-        {/* Top section - title */}
-        <motion.div
-          initial={{ opacity: 0, y: -20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5, duration: 1 }}
-        >
-          <h2 
-            className="text-2xl md:text-5xl text-white mb-2 md:mb-3"
-            style={{ 
-              fontFamily: 'Satoshi, sans-serif', 
-              fontWeight: 700,
-              letterSpacing: '0.03em'
-            }}
-          >
-            {t.slide7Title1}
-          </h2>
-          <h2 
-            className="text-2xl md:text-5xl text-[#C58B30]"
-            style={{ 
-              fontFamily: 'Satoshi, sans-serif', 
-              fontWeight: 300,
-              fontStyle: 'italic',
-              letterSpacing: '0.03em'
-            }}
-          >
-            {t.slide7Title2}
-          </h2>
-        </motion.div>
-
-        {/* Bottom section - venue info */}
-        <div>
-          {/* Venue name & description */}
+      {/* Content overlay - COM PADDINGS PADRÃO */}
+      <div className="absolute inset-0"
+        style={{
+          paddingTop: '80px',
+          paddingBottom: '160px',
+          paddingLeft: '16px',
+          paddingRight: '16px',
+        }}
+      >
+        <div className="h-full flex flex-col justify-between max-w-7xl mx-auto">
+          {/* Top section - title */}
           <motion.div
-            key={currentIndex}
-            initial={{ opacity: 0, y: 30 }}
+            initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.8 }}
-            className="mb-4 md:mb-6"
+            transition={{ delay: 0.5, duration: 1 }}
           >
-            <h3 
-              className="text-xl md:text-4xl text-white mb-1 md:mb-2"
+            <h2 
+              className="text-2xl md:text-5xl text-white mb-2 md:mb-3"
               style={{ 
                 fontFamily: 'Satoshi, sans-serif', 
-                fontWeight: 600,
-                letterSpacing: '0.02em'
+                fontWeight: 700,
+                letterSpacing: '0.03em'
               }}
             >
-              {venues[currentIndex].name}
-            </h3>
-            <p 
-              className="text-sm md:text-xl text-white/60"
+              {t.slide7Title1}
+            </h2>
+            <h2 
+              className="text-2xl md:text-5xl text-[#C58B30]"
               style={{ 
                 fontFamily: 'Satoshi, sans-serif', 
                 fontWeight: 300,
-                fontStyle: 'italic'
+                fontStyle: 'italic',
+                letterSpacing: '0.03em'
               }}
             >
-              {venues[currentIndex].desc}
-            </p>
+              {t.slide7Title2}
+            </h2>
           </motion.div>
 
-          {/* Progress bar */}
-          <div className="flex gap-2">
-            {venues.map((_, index) => (
-              <div key={index} className="flex-1 h-0.5 bg-white/20 rounded-full overflow-hidden">
-                <motion.div
-                  initial={{ scaleX: 0 }}
-                  animate={{ 
-                    scaleX: currentIndex === index ? 1 : 0
-                  }}
-                  transition={{ 
-                    duration: currentIndex === index ? 4.5 : 0.3,
-                    ease: 'linear'
-                  }}
-                  className="h-full bg-[#C58B30] origin-left"
-                />
-              </div>
-            ))}
+          {/* Bottom section - venue info */}
+          <div>
+            {/* Venue name & description */}
+            <motion.div
+              key={currentIndex}
+              initial={{ opacity: 0, y: 30 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.8 }}
+              className="mb-6 md:mb-8"
+            >
+              <h3 
+                className="text-xl md:text-4xl text-white mb-1 md:mb-2"
+                style={{ 
+                  fontFamily: 'Satoshi, sans-serif', 
+                  fontWeight: 600,
+                  letterSpacing: '0.02em'
+                }}
+              >
+                {venues[currentIndex].name}
+              </h3>
+              <p 
+                className="text-sm md:text-xl text-white/60"
+                style={{ 
+                  fontFamily: 'Satoshi, sans-serif', 
+                  fontWeight: 300,
+                  fontStyle: 'italic'
+                }}
+              >
+                {venues[currentIndex].desc}
+              </p>
+            </motion.div>
+
+            {/* Progress bar */}
+            <div className="flex gap-2">
+              {venues.map((_, index) => (
+                <div key={index} className="flex-1 h-0.5 bg-white/20 rounded-full overflow-hidden">
+                  <motion.div
+                    initial={{ scaleX: 0 }}
+                    animate={{ 
+                      scaleX: currentIndex === index ? 1 : 0
+                    }}
+                    transition={{ 
+                      duration: currentIndex === index ? 4.5 : 0.3,
+                      ease: 'linear'
+                    }}
+                    className="h-full bg-[#C58B30] origin-left"
+                  />
+                </div>
+              ))}
+            </div>
           </div>
         </div>
       </div>
 
-      {/* Navigation dots - side */}
-      <div className="hidden md:flex absolute right-12 top-1/2 -translate-y-1/2 flex-col gap-4">
+      {/* Navigation dots - side - RESPEITANDO PADDINGS */}
+      <div className="hidden md:flex absolute right-8 top-1/2 -translate-y-1/2 flex-col gap-4 z-30">
         {venues.map((_, index) => (
           <motion.button
             key={index}
@@ -181,7 +186,8 @@ export default function LuxurySlide8({ language }: { language: Language; isMuted
               scale: currentIndex === index ? 1.5 : 1,
               opacity: currentIndex === index ? 1 : 0.3
             }}
-            className="w-2 h-2 rounded-full bg-white cursor-pointer"
+            className="w-2 h-2 rounded-full bg-white cursor-pointer transition-all"
+            whileHover={{ scale: 1.8 }}
           />
         ))}
       </div>

@@ -2,19 +2,22 @@ import { useState, useEffect, useRef, useCallback, useMemo, lazy, Suspense } fro
 import { motion, AnimatePresence } from 'motion/react';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import { Language, translations } from './translations';
-import {
-  AUDIO_CONFIG,
-  ANIMATION_CONFIG,
-  SLIDES_WITH_VIDEO,
-  BACKGROUND_MUSIC_TRACKS
+import { 
+  AUDIO_CONFIG, 
+  ANIMATION_CONFIG, 
+  SLIDES_WITH_VIDEO, 
+  BACKGROUND_MUSIC_TRACKS 
 } from './constants';
 import { useAudioFade } from './hooks/useAudioFade';
 import { useKeyboardNavigation } from './hooks/useKeyboardNavigation';
 import { useTouchNavigation } from './hooks/useTouchNavigation';
 import { useReducedMotion } from './hooks/useReducedMotion';
+import { useIsMobile } from './hooks/useDevice';
 import LanguageSelector from './components/LanguageSelector';
 import LanguageSwitcher from './components/LanguageSwitcher';
 import MusicPlayer from './components/MusicPlayer';
+import MobileMusicPlayer from './components/MobileMusicPlayer';
+import SwipeIndicator from './components/SwipeIndicator';
 
 // Lazy loading dos slides para melhor performance inicial
 const Slide1 = lazy(() => import('./components/LuxurySlide1'));
@@ -45,41 +48,22 @@ export default function App() {
   const [currentSlide, setCurrentSlide] = useState(0);
   const [showControls, setShowControls] = useState(false);
   const [showInstructions, setShowInstructions] = useState(true);
-
-  // IMPORTANTE:
-  // Vamos tratar "isMusicMuted" como "mute ligado/desligado" (não pause),
-  // pois autoplay com som costuma ser bloqueado no mobile.
-  const [isMusicMuted, setIsMusicMuted] = useState(true); // começa MUTADO para facilitar autoplay
+  const [isMusicMuted, setIsMusicMuted] = useState(false);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-
+  
   // Refs
   const audioRef = useRef<HTMLAudioElement>(null);
   const hideControlsTimeoutRef = useRef<number>();
-
+  
   // Custom hooks
   const { fadeIn, fadeOut, cancelFade } = useAudioFade();
   const prefersReducedMotion = useReducedMotion();
+  const isMobile = useIsMobile();
 
   // Memoized values
   const CurrentSlideComponent = useMemo(() => slides[currentSlide], [currentSlide]);
   const hasVideo = useMemo(() => SLIDES_WITH_VIDEO.includes(currentSlide), [currentSlide]);
-
-  // Detecta mobile e atualiza em resize (evita ficar travado)
-  const [isMobile, setIsMobile] = useState(() => window.matchMedia('(max-width: 767px)').matches);
-  useEffect(() => {
-    const mq = window.matchMedia('(max-width: 767px)');
-    const handler = (e: MediaQueryListEvent) => setIsMobile(e.matches);
-
-    // Safari antigo pode não ter addEventListener
-    if (mq.addEventListener) mq.addEventListener('change', handler);
-    else mq.addListener(handler);
-
-    return () => {
-      if (mq.removeEventListener) mq.removeEventListener('change', handler);
-      else mq.removeListener(handler);
-    };
-  }, []);
 
   // Callbacks otimizados com useCallback
   const handleNavigate = useCallback((newSlide: number) => {
@@ -90,12 +74,12 @@ export default function App() {
 
   const handleShowControls = useCallback(() => {
     setShowControls(true);
-
+    
     // Clear timeout anterior
     if (hideControlsTimeoutRef.current) {
       clearTimeout(hideControlsTimeoutRef.current);
     }
-
+    
     // Auto-hide controls após 3 segundos de inatividade (desktop only)
     if (!isMobile) {
       hideControlsTimeoutRef.current = window.setTimeout(() => {
@@ -111,40 +95,43 @@ export default function App() {
     }
   }, [isMobile]);
 
-  // Play/Pause agora vira MUTE/UNMUTE (para autoplay funcionar melhor)
-  const handlePlayPause = useCallback(() => {
+  const toggleMusic = useCallback(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Garante que está tocando (mesmo que mutado)
-    if (audio.paused) {
+    if (isMusicMuted) {
       audio.play().catch(err => console.log('Playback error:', err));
+      setIsMusicMuted(false);
+    } else {
+      audio.pause();
+      setIsMusicMuted(true);
     }
-
-    // Alterna mute
-    const nextMuted = !isMusicMuted;
-    audio.muted = nextMuted; // true = mutado, false = com som
-    setIsMusicMuted(nextMuted);
-
-    // Se desmutou, aplica volume padrão (suave)
-    if (!nextMuted) {
-      audio.volume = 0;
-      fadeIn(audio, AUDIO_CONFIG.DEFAULT_VOLUME, AUDIO_CONFIG.FADE_IN_DURATION);
-    }
-  }, [isMusicMuted, fadeIn]);
+  }, [isMusicMuted]);
 
   const handleNextTrack = useCallback(() => {
     const newIndex = (currentTrackIndex + 1) % BACKGROUND_MUSIC_TRACKS.length;
     setCurrentTrackIndex(newIndex);
-    // quando troca a música, mantém mutado (mobile-friendly)
-    setIsMusicMuted(true);
+    setIsMusicMuted(false);
   }, [currentTrackIndex]);
 
   const handlePreviousTrack = useCallback(() => {
     const newIndex = (currentTrackIndex - 1 + BACKGROUND_MUSIC_TRACKS.length) % BACKGROUND_MUSIC_TRACKS.length;
     setCurrentTrackIndex(newIndex);
-    setIsMusicMuted(true);
+    setIsMusicMuted(false);
   }, [currentTrackIndex]);
+
+  const handlePlayPause = useCallback(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    if (audio.paused) {
+      audio.play().catch(err => console.log('Playback error:', err));
+      setIsMusicMuted(false);
+    } else {
+      audio.pause();
+      setIsMusicMuted(true);
+    }
+  }, []);
 
   // Keyboard navigation
   useKeyboardNavigation({
@@ -165,11 +152,11 @@ export default function App() {
   // Hide instructions after timeout
   useEffect(() => {
     if (!selectedLanguage) return;
-
+    
     const timer = setTimeout(() => {
       setShowInstructions(false);
     }, ANIMATION_CONFIG.INSTRUCTIONS_TIMEOUT);
-
+    
     return () => clearTimeout(timer);
   }, [selectedLanguage]);
 
@@ -179,6 +166,33 @@ export default function App() {
       setShowControls(true);
     }
   }, [isMobile]);
+
+  // Autoplay music when language is selected
+  useEffect(() => {
+    if (!selectedLanguage) return;
+    
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    // Try to autoplay after language selection
+    const tryAutoplay = async () => {
+      try {
+        audio.volume = 0;
+        await audio.play();
+        fadeIn(audio, AUDIO_CONFIG.DEFAULT_VOLUME, AUDIO_CONFIG.FADE_IN_DURATION);
+        setIsPlaying(true);
+        setIsMusicMuted(false);
+      } catch (err) {
+        console.log('Autoplay blocked, user interaction required:', err);
+        setIsMusicMuted(true);
+        setIsPlaying(false);
+      }
+    };
+
+    // Small delay to ensure smooth transition
+    const timer = setTimeout(tryAutoplay, 500);
+    return () => clearTimeout(timer);
+  }, [selectedLanguage, fadeIn]);
 
   // Track audio play/pause state
   useEffect(() => {
@@ -203,21 +217,15 @@ export default function App() {
     const audio = audioRef.current;
     if (!audio) return;
 
-    // Mantém o estado de mute aplicado ao elemento
-    audio.muted = isMusicMuted;
-
     if (hasVideo) {
       // Fade out quando tem vídeo
       fadeOut(audio, AUDIO_CONFIG.FADE_OUT_DURATION);
     } else {
-      // Tenta tocar (mutado) para satisfazer autoplay em mobile
-      if (audio.paused) {
-        audio.play().catch(err => console.log('Autoplay blocked:', err));
-      }
-
-      // Se não estiver mutado, faz fade in de volume
-      if (!isMusicMuted) {
-        fadeIn(audio, AUDIO_CONFIG.DEFAULT_VOLUME, AUDIO_CONFIG.FADE_IN_DURATION);
+      // Fade in quando não tem vídeo
+      if (audio.paused && !isMusicMuted) {
+        audio.play().then(() => {
+          fadeIn(audio, AUDIO_CONFIG.DEFAULT_VOLUME, AUDIO_CONFIG.FADE_IN_DURATION);
+        }).catch(err => console.log('Autoplay blocked:', err));
       }
     }
 
@@ -236,7 +244,7 @@ export default function App() {
       do {
         newIndex = Math.floor(Math.random() * BACKGROUND_MUSIC_TRACKS.length);
       } while (newIndex === currentTrackIndex && BACKGROUND_MUSIC_TRACKS.length > 1);
-
+      
       setCurrentTrackIndex(newIndex);
     };
 
@@ -253,19 +261,19 @@ export default function App() {
     audio.currentTime = 0;
     audio.src = BACKGROUND_MUSIC_TRACKS[currentTrackIndex];
     audio.load();
-
+    
     const playTimeout = setTimeout(() => {
-      if (!hasVideo) {
-        // tenta tocar mutado
-        audio.muted = true;
-        audio.play().catch(err => console.log('Playback error:', err));
+      if (!hasVideo && !isMusicMuted) {
+        audio.play().then(() => {
+          fadeIn(audio, AUDIO_CONFIG.DEFAULT_VOLUME, AUDIO_CONFIG.FADE_IN_DURATION);
+        }).catch(err => console.log('Playback error:', err));
       }
     }, AUDIO_CONFIG.TRACK_SWITCH_DELAY);
 
     return () => {
       clearTimeout(playTimeout);
     };
-  }, [currentTrackIndex, hasVideo]);
+  }, [currentTrackIndex, hasVideo, isMusicMuted, fadeIn]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -285,7 +293,7 @@ export default function App() {
   const t = translations[selectedLanguage];
 
   return (
-    <div
+    <div 
       className="w-screen h-screen overflow-hidden bg-[#0B0B0B] relative"
       onMouseMove={handleShowControls}
       onMouseLeave={handleHideControls}
@@ -329,9 +337,9 @@ export default function App() {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0 }}
-          transition={{
-            duration: prefersReducedMotion ? 0 : ANIMATION_CONFIG.SLIDE_TRANSITION_DURATION,
-            ease: 'easeInOut'
+          transition={{ 
+            duration: prefersReducedMotion ? 0 : ANIMATION_CONFIG.SLIDE_TRANSITION_DURATION, 
+            ease: 'easeInOut' 
           }}
           className="w-full h-full"
           role="region"
@@ -387,24 +395,40 @@ export default function App() {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: 20 }}
             transition={{ duration: ANIMATION_CONFIG.CONTROLS_ANIMATION_DURATION }}
-            className="absolute bottom-6 md:bottom-8 left-1/2 -translate-x-1/2 z-50 px-4 md:px-5 py-2 md:py-2.5 rounded-full bg-[#C58B30]/10 backdrop-blur-md border border-[#C58B30]/30"
+            className="absolute left-1/2 -translate-x-1/2 z-50"
+            style={{
+              // Desktop: bottom-8, Mobile: acima do player (120px do bottom)
+              bottom: isMobile ? '120px' : '32px'
+            }}
             role="status"
             aria-live="polite"
           >
-            <span
-              className="text-[#C58B30] text-sm md:text-base"
-              style={{ fontFamily: 'Satoshi, sans-serif', fontWeight: 500, letterSpacing: '0.05em' }}
-              aria-label={`Slide ${currentSlide + 1} of ${slides.length}`}
-            >
-              {currentSlide + 1} / {slides.length}
-            </span>
+            {/* Desktop: Counter */}
+            <div className="hidden md:block px-5 py-2.5 rounded-full bg-[#C58B30]/10 backdrop-blur-md border border-[#C58B30]/30">
+              <span 
+                className="text-[#C58B30] text-base"
+                style={{ fontFamily: 'Satoshi, sans-serif', fontWeight: 500, letterSpacing: '0.05em' }}
+                aria-label={`Slide ${currentSlide + 1} of ${slides.length}`}
+              >
+                {currentSlide + 1} / {slides.length}
+              </span>
+            </div>
+
+            {/* Mobile: Swipe Indicator with Dots */}
+            <div className="md:hidden">
+              <SwipeIndicator
+                currentIndex={currentSlide}
+                totalSlides={slides.length}
+                onDotClick={handleNavigate}
+              />
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      {/* Top Right Controls */}
+      {/* Top Right Controls - Desktop Only */}
       <AnimatePresence>
-        {showControls && (
+        {showControls && !isMobile && (
           <motion.div
             initial={{ opacity: 0, y: -20 }}
             animate={{ opacity: 1, y: 0 }}
@@ -412,17 +436,14 @@ export default function App() {
             transition={{ duration: ANIMATION_CONFIG.CONTROLS_ANIMATION_DURATION }}
             className="absolute top-8 right-8 z-50 flex items-center gap-3"
           >
-            {/* ✅ GARANTIDO: no mobile, NÃO renderiza o player */}
-            {!isMobile && (
-              <MusicPlayer
-                isPlaying={isPlaying}
-                onPlayPause={handlePlayPause}
-                onNext={handleNextTrack}
-                onPrevious={handlePreviousTrack}
-              />
-            )}
-
-            <LanguageSwitcher
+            <MusicPlayer
+              isPlaying={isPlaying}
+              onPlayPause={handlePlayPause}
+              onNext={handleNextTrack}
+              onPrevious={handlePreviousTrack}
+            />
+            
+            <LanguageSwitcher 
               currentLanguage={selectedLanguage}
               onLanguageChange={setSelectedLanguage}
             />
@@ -430,21 +451,40 @@ export default function App() {
         )}
       </AnimatePresence>
 
-      {/* Background Music - SEM CONTROLS (invisível por padrão) */}
+      {/* Mobile Music Player - Bottom Fixed */}
+      {isMobile && (
+        <MobileMusicPlayer
+          isPlaying={isPlaying}
+          onPlayPause={handlePlayPause}
+          onNext={handleNextTrack}
+          onPrevious={handlePreviousTrack}
+        />
+      )}
+
+      {/* Mobile Language Switcher - Top Right */}
+      <AnimatePresence>
+        {showControls && isMobile && (
+          <motion.div
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            transition={{ duration: ANIMATION_CONFIG.CONTROLS_ANIMATION_DURATION }}
+            className="absolute top-6 right-6 z-50"
+          >
+            <LanguageSwitcher 
+              currentLanguage={selectedLanguage}
+              onLanguageChange={setSelectedLanguage}
+            />
+          </motion.div>
+        )}
+      </AnimatePresence>
+
+      {/* Background Music - Preload metadata only */}
       <audio
         ref={audioRef}
         src={BACKGROUND_MUSIC_TRACKS[currentTrackIndex]}
         preload="metadata"
-        muted
-        playsInline
         aria-label="Background music"
-        style={{
-          position: 'absolute',
-          width: 1,
-          height: 1,
-          opacity: 0,
-          pointerEvents: 'none'
-        }}
       />
     </div>
   );

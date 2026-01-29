@@ -112,9 +112,17 @@ export default function LuxurySlide5Composer({ language, isMuted }: { language: 
         />
       </motion.div>
 
-      {/* Content */}
-      <div className="absolute inset-0 flex items-center justify-center px-6 md:px-20 py-12 md:py-16 z-20">
-        <div className="max-w-6xl w-full">
+      {/* Content - PADRÃO TELA 3 */}
+      <div className="absolute inset-0 overflow-y-auto overflow-x-hidden md:overflow-visible z-20"
+        style={{
+          paddingTop: '140px',
+          paddingBottom: '250px',
+          paddingLeft: '16px',
+          paddingRight: '16px',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        <div className="max-w-7xl w-full mx-auto md:px-4">
           
           {/* Header */}
           <motion.div

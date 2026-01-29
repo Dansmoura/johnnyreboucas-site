@@ -101,7 +101,7 @@ export default function LuxurySlide4({ language, isMuted }: { language: Language
   };
 
   return (
-    <div className="w-full h-full bg-[#0B0B0B] relative overflow-hidden">
+    <div className="w-full h-full bg-[#0B0B0B] relative overflow-hidden md:overflow-visible">
       {/* Full-screen Video Background */}
       <motion.div
         initial={{ scale: 1.1, opacity: 0 }}
@@ -163,22 +163,30 @@ export default function LuxurySlide4({ language, isMuted }: { language: Language
         />
       </motion.div>
 
-      {/* Content */}
-      <div className="absolute inset-0 flex items-center justify-center px-6 md:px-20 py-8 md:py-16 z-20">
-        <div className="max-w-7xl w-full">
+      {/* Content - COM SCROLL EM MOBILE */}
+      <div className="absolute inset-0 overflow-y-auto overflow-x-hidden md:overflow-visible z-20"
+        style={{
+          paddingTop: '140px',
+          paddingBottom: '250px',
+          paddingLeft: '16px',
+          paddingRight: '16px',
+          WebkitOverflowScrolling: 'touch',
+        }}
+      >
+        <div className="max-w-7xl w-full mx-auto md:px-4">
           
           {/* Header */}
           <motion.div
             initial={{ opacity: 0, y: -30 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5, duration: 1 }}
-            className="text-center mb-8 md:mb-16"
+            className="text-center mb-6 md:mb-16"
           >
             {/* Overline */}
-            <div className="flex items-center justify-center gap-2 md:gap-4 mb-3 md:mb-4">
-              <div className="h-px w-10 md:w-20 bg-gradient-to-r from-transparent to-[#C58B30]" />
+            <div className="flex items-center justify-center gap-2 md:gap-4 mb-2 md:mb-4">
+              <div className="h-px w-8 md:w-20 bg-gradient-to-r from-transparent to-[#C58B30]" />
               <span 
-                className="text-[#C58B30] tracking-[0.3em] md:tracking-[0.4em] uppercase text-[0.65rem] md:text-sm"
+                className="text-[#C58B30] tracking-[0.3em] md:tracking-[0.4em] uppercase text-[0.6rem] md:text-sm"
                 style={{ 
                   fontFamily: 'Satoshi, sans-serif', 
                   fontWeight: 500
@@ -186,12 +194,12 @@ export default function LuxurySlide4({ language, isMuted }: { language: Language
               >
                 {t.slide4Overline}
               </span>
-              <div className="h-px w-10 md:w-20 bg-gradient-to-l from-transparent to-[#C58B30]" />
+              <div className="h-px w-8 md:w-20 bg-gradient-to-l from-transparent to-[#C58B30]" />
             </div>
 
             {/* Main Title */}
             <h2 
-              className="text-white mb-3 md:mb-5 text-3xl md:text-[4.5rem] leading-tight md:leading-none"
+              className="text-white mb-2 md:mb-5 text-2xl md:text-[4.5rem] leading-tight md:leading-none px-2"
               style={{ 
                 fontFamily: 'Satoshi, sans-serif', 
                 fontWeight: 700,
@@ -207,11 +215,11 @@ export default function LuxurySlide4({ language, isMuted }: { language: Language
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               transition={{ delay: 0.9, duration: 1 }}
-              className="text-white/70 max-w-3xl mx-auto text-sm md:text-lg px-4 md:px-0"
+              className="text-white/70 max-w-3xl mx-auto text-xs md:text-lg px-2"
               style={{ 
                 fontFamily: 'Satoshi, sans-serif', 
                 fontWeight: 300,
-                lineHeight: '1.7',
+                lineHeight: '1.6',
                 textShadow: '0 3px 20px rgba(0, 0, 0, 0.9)'
               }}
             >
@@ -219,8 +227,8 @@ export default function LuxurySlide4({ language, isMuted }: { language: Language
             </motion.p>
           </motion.div>
 
-          {/* Concept Grid - 2x2 Refined */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 max-w-5xl mx-auto">
+          {/* Concept Grid - 2x2 Refined - MOBILE AJUSTADO */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-6 max-w-5xl mx-auto">
             {conceptPoints.map((point, index) => {
               const IconComponent = Icons[point.icon as keyof typeof Icons];
               
@@ -236,9 +244,9 @@ export default function LuxurySlide4({ language, isMuted }: { language: Language
                   }}
                   className="relative group"
                 >
-                  {/* Card */}
+                  {/* Card - PADDING REDUZIDO MOBILE */}
                   <div 
-                    className="relative p-5 md:p-7 h-full transition-all duration-500 group-hover:translate-y-[-4px]"
+                    className="relative p-4 md:p-7 h-full transition-all duration-500 group-hover:translate-y-[-4px]"
                     style={{
                       background: 'rgba(11, 11, 11, 0.6)',
                       backdropFilter: 'blur(40px)',
@@ -256,10 +264,10 @@ export default function LuxurySlide4({ language, isMuted }: { language: Language
                       }}
                     />
 
-                    {/* Icon + Title row */}
-                    <div className="flex items-start gap-4 mb-4">
+                    {/* Icon + Title row - MOBILE AJUSTADO */}
+                    <div className="flex items-start gap-3 mb-3">
                       <div 
-                        className="w-12 h-12 flex items-center justify-center flex-shrink-0 text-[#C58B30] transition-all duration-500 group-hover:scale-110"
+                        className="w-10 h-10 md:w-12 md:h-12 flex items-center justify-center flex-shrink-0 text-[#C58B30] transition-all duration-500 group-hover:scale-110"
                         style={{
                           background: 'linear-gradient(135deg, rgba(197, 139, 48, 0.2) 0%, rgba(197, 139, 48, 0.05) 100%)',
                           borderRadius: '0.5rem',
@@ -269,13 +277,12 @@ export default function LuxurySlide4({ language, isMuted }: { language: Language
                         <IconComponent />
                       </div>
                       
-                      <div className="flex-1 pt-1">
+                      <div className="flex-1 pt-0.5">
                         <h3 
-                          className="text-white mb-1"
+                          className="text-white mb-0.5 text-base md:text-xl"
                           style={{ 
                             fontFamily: 'Satoshi, sans-serif', 
                             fontWeight: 600,
-                            fontSize: '1.25rem',
                             lineHeight: '1.3',
                             letterSpacing: '-0.01em',
                             textShadow: '0 2px 15px rgba(0, 0, 0, 0.8)'
@@ -284,11 +291,10 @@ export default function LuxurySlide4({ language, isMuted }: { language: Language
                           {point.title}
                         </h3>
                         <p 
-                          className="text-[#C58B30]"
+                          className="text-[#C58B30] text-xs md:text-sm"
                           style={{ 
                             fontFamily: 'Satoshi, sans-serif', 
                             fontWeight: 500,
-                            fontSize: '0.9rem',
                             letterSpacing: '0.01em'
                           }}
                         >
@@ -297,13 +303,13 @@ export default function LuxurySlide4({ language, isMuted }: { language: Language
                       </div>
                     </div>
 
-                    {/* Description */}
+                    {/* Description - MOBILE AJUSTADO */}
                     <p 
-                      className="text-white/60 pl-0 md:pl-16 text-xs md:text-sm"
+                      className="text-white/60 pl-0 text-xs md:text-sm"
                       style={{ 
                         fontFamily: 'Satoshi, sans-serif', 
                         fontWeight: 300,
-                        lineHeight: '1.5'
+                        lineHeight: '1.4'
                       }}
                     >
                       {point.description}
@@ -324,12 +330,12 @@ export default function LuxurySlide4({ language, isMuted }: { language: Language
             })}
           </div>
 
-          {/* Bottom tagline */}
+          {/* Bottom tagline - MOBILE HIDDEN ou MENOR */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 2.2, duration: 1 }}
-            className="text-center mt-12"
+            className="text-center mt-6 md:mt-12 hidden md:block"
           >
             <div className="inline-flex items-center gap-3 px-6 py-3 rounded-full"
               style={{

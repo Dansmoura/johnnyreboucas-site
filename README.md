@@ -1,7 +1,7 @@
 
   # Johnny - Final
 
-  This is a code bundle for Johnny - Final. The original project is available at https://www.figma.com/design/elyXnvR0WqPCVeEDqpve8B/Johnny---Final.
+  This is a code bundle for Johnny - Final. The original project is available at https://www.figma.com/design/VJaGTrdxt1NVS6P6HpgM6s/Johnny---Final.
 
   ## Running the code
 

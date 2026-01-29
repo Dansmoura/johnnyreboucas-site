@@ -1,14 +1,9 @@
-import { defineConfig } from 'vite'
-import react from '@vitejs/plugin-react-swc'
-import path from 'path'
+import { defineConfig } from 'vite';
+import react from '@vitejs/plugin-react-swc';
+import path from 'path';
 
 export default defineConfig({
   plugins: [react()],
-
-  build: {
-    target: 'esnext',
-    outDir: 'dist',
-  },
 
   resolve: {
     extensions: ['.js', '.jsx', '.ts', '.tsx', '.json'],
@@ -23,14 +18,38 @@ export default defineConfig({
       'lucide-react@0.487.0': 'lucide-react',
       'input-otp@1.4.2': 'input-otp',
 
-      'figma:asset/ef852d0a546660aa697c387bbb2f38062be8dcda.png': path.resolve(__dirname, './src/assets/ef852d0a546660aa697c387bbb2f38062be8dcda.png'),
-      'figma:asset/e73f472387a95ae6312f3903f8407b33ee5b1b67.png': path.resolve(__dirname, './src/assets/e73f472387a95ae6312f3903f8407b33ee5b1b67.png'),
-      'figma:asset/da7dfd3f088ee83b811e41eb4a4a325fa6fd6233.png': path.resolve(__dirname, './src/assets/da7dfd3f088ee83b811e41eb4a4a325fa6fd6233.png'),
-      'figma:asset/cd6f702f297ed2f6e51d2e9dcdb41006ed738c0f.png': path.resolve(__dirname, './src/assets/cd6f702f297ed2f6e51d2e9dcdb41006ed738c0f.png'),
-      'figma:asset/b881a7247ba2594c9ec6cc24a7a70078d3bbe6fd.png': path.resolve(__dirname, './src/assets/b881a7247ba2594c9ec6cc24a7a70078d3bbe6fd.png'),
-      'figma:asset/6838e40d50507a6bb6cbfe88c223655d35e5f388.png': path.resolve(__dirname, './src/assets/6838e40d50507a6bb6cbfe88c223655d35e5f388.png'),
-      'figma:asset/47803e83f7fe1513c9a7db532fe8e8c81fad5914.png': path.resolve(__dirname, './src/assets/47803e83f7fe1513c9a7db532fe8e8c81fad5914.png'),
-      'figma:asset/23a7e8d0ab30f510bc1f7b77298050084e77bc35.png': path.resolve(__dirname, './src/assets/23a7e8d0ab30f510bc1f7b77298050084e77bc35.png'),
+      'figma:asset/ef852d0a546660aa697c387bbb2f38062be8dcda.png': path.resolve(
+        __dirname,
+        './src/assets/ef852d0a546660aa697c387bbb2f38062be8dcda.png'
+      ),
+      'figma:asset/e73f472387a95ae6312f3903f8407b33ee5b1b67.png': path.resolve(
+        __dirname,
+        './src/assets/e73f472387a95ae6312f3903f8407b33ee5b1b67.png'
+      ),
+      'figma:asset/da7dfd3f088ee83b811e41eb4a4a325fa6fd6233.png': path.resolve(
+        __dirname,
+        './src/assets/da7dfd3f088ee83b811e41eb4a4a325fa6fd6233.png'
+      ),
+      'figma:asset/cd6f702f297ed2f6e51d2e9dcdb41006ed738c0f.png': path.resolve(
+        __dirname,
+        './src/assets/cd6f702f297ed2f6e51d2e9dcdb41006ed738c0f.png'
+      ),
+      'figma:asset/b881a7247ba2594c9ec6cc24a7a70078d3bbe6fd.png': path.resolve(
+        __dirname,
+        './src/assets/b881a7247ba2594c9ec6cc24a7a70078d3bbe6fd.png'
+      ),
+      'figma:asset/6838e40d50507a6bb6cbfe88c223655d35e5f388.png': path.resolve(
+        __dirname,
+        './src/assets/6838e40d50507a6bb6cbfe88c223655d35e5f388.png'
+      ),
+      'figma:asset/47803e83f7fe1513c9a7db532fe8e8c81fad5914.png': path.resolve(
+        __dirname,
+        './src/assets/47803e83f7fe1513c9a7db532fe8e8c81fad5914.png'
+      ),
+      'figma:asset/23a7e8d0ab30f510bc1f7b77298050084e77bc35.png': path.resolve(
+        __dirname,
+        './src/assets/23a7e8d0ab30f510bc1f7b77298050084e77bc35.png'
+      ),
 
       'embla-carousel-react@8.6.0': 'embla-carousel-react',
       'cmdk@1.1.1': 'cmdk',
@@ -67,8 +86,13 @@ export default defineConfig({
     },
   },
 
+  build: {
+    target: 'esnext',
+    outDir: 'dist', // ✅ Netlify publica esta pasta
+  },
+
   server: {
     port: 3000,
     open: true,
   },
-})
+});
